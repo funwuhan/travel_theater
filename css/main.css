@@ -1,0 +1,104 @@
+/* css/main.css */
+
+/* Basic reset and global styles for fullscreen effect */
+html, body {
+    height: 100%; /* Fallback for older browsers, 100vh is generally preferred */
+    width: 100%;  /* Fallback for older browsers, 100vw is generally preferred */
+    overflow: hidden; /* Prevent scrolling on the html/body level */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Better box model */
+    -webkit-font-smoothing: antialiased; /* Smoother fonts on WebKit */
+    -moz-osx-font-smoothing: grayscale; /* Smoother fonts on Firefox */
+    overscroll-behavior: none; /* Prevent "pull-to-refresh" or "bounce" effects on mobile */
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on touch devices */
+}
+
+/* Ensure all elements use border-box */
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+
+/* Further ensure no scrollbars are ever displayed by the root elements */
+html {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+html::-webkit-scrollbar {
+    display: none; /* WebKit browsers */
+}
+body::-webkit-scrollbar {
+    display: none; /* WebKit browsers, for body specifically if html one is bypassed */
+}
+
+/* You can add other global styles below, e.g., default font families */
+/*
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #333;
+}
+*/
+
+/* 旅途摄影剧场 - 主要样式 */
+
+/* 重置和基础样式 */
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-family: 'Noto Serif SC', "PingFang SC", "Microsoft YaHei", serif;
+    background: #fff;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* 全局链接样式 */
+a {
+    text-decoration: none;
+    color: #614385;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #516395;
+}
+
+/* 全局按钮样式 */
+button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+/* 图片通用样式 */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* 工具类 */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+/* 响应式断点 */
+@media (max-width: 768px) {
+    /* 平板样式 */
+}
+
+@media (max-width: 480px) {
+    /* 手机样式 */
+} 

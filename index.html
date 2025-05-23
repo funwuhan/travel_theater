@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>旅途摄影剧场</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            font-family: 'Noto Serif SC', "PingFang SC", "Microsoft YaHei", serif;
+            background: #fff;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        /* 主要内容区域 */
+        .content {
+            width: 100%;
+            height: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #333;
+            background: #fff;
+            padding-bottom: 50px;
+            transition: opacity 0.3s ease;
+        }
+        
+        .content.hidden {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        /* 摄影展示区域 */
+        .photo-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 10;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .photo-scene.active {
+            opacity: 1;
+        }
+        
+        /* 后退按钮 */
+        .back-button {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: none;
+        }
+        
+        .content h1 {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .content p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        /* 适配小屏幕设备 */
+        @media screen and (max-width: 375px) {
+            .content h1 {
+                font-size: 1.7rem;
+            }
+            .content p {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+        }
+        
+        /* 按钮样式 */
+        .photo-collection-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 30px 0;
+            padding: 0 20px;
+        }
+        
+        .photo-btn {
+            display: block;
+            width: 100%;
+            max-width: 320px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #3a6186, #89253e);
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .photo-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .photo-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .photo-btn:hover::after {
+            left: 100%;
+        }
+        
+        .btn-a {
+            background: linear-gradient(135deg, #614385, #516395);
+        }
+        
+        .btn-b {
+            background: linear-gradient(135deg, #cc2b5e, #753a88);
+        }
+        
+        /* 加载指示器 */
+        .loader {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 30;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 主内容区 -->
+    <div class="content" id="mainContent">
+        <h1>昙华林：武汉的历史文化街区</h1>
+        
+        <!-- 添加跳转按钮 -->
+        <div class="photo-collection-buttons">
+            <a href="javascript:void(0)" class="photo-btn btn-a" data-scene="scene-a" data-src="scenes/scene_a.html">昙华林·黄昏印象</a>
+            <a href="javascript:void(0)" class="photo-btn btn-b" data-scene="scene-b" data-src="scenes/scene_b.html">昙华林·光影街巷</a>
+        </div>
+        
+        <p>昙华林，位于武汉市武昌区，是一条充满历史韵味的老街。这里曾是武汉近代文化的发源地之一，保存了大量民国时期的建筑和文化遗产。漫步在昙华林的石板路上，仿佛穿越回了百年前的武汉。</p>
+        <p>街区内有许多特色小店、咖啡馆和艺术工作室，吸引了众多文艺青年和游客。昙华林不仅是拍照打卡的胜地，更是了解武汉历史文化的窗口。</p>
+        <p>推荐景点：</p>
+        <ul>
+            <li>昙华林艺术区：聚集了众多艺术家工作室和画廊。</li>
+            <li>老教堂：保存完好的西式建筑，见证了武汉的近代历史。</li>
+            <li>特色书店：如"猫的天空之城"，适合静享阅读时光。</li>
+        </ul>
+        <p>昙华林的夜晚也别有一番风味，灯光下的老街更显浪漫。无论是白天还是夜晚，这里都值得一游。</p>
+        <p>交通指南：乘坐地铁2号线至螃蟹岬站，步行约10分钟即可到达。</p>
+        <p>昙华林历史可以追溯到明清时期，当时这里是文人雅士聚集的地方。街区名称"昙华林"源于古代一种名为"昙华"的花，传说此花千年一开，象征着珍贵与难得。</p>
+        <p>民国时期，这里成为了武汉文化教育的中心，多所著名学校和教堂在此建立。如今的昙华林保留了大量具有历史价值的建筑，包括砖木结构的民居、西式洋楼和教堂建筑等。</p>
+        <p>漫步昙华林，你可以感受到浓厚的历史氛围和文化底蕴。街道两旁的老建筑讲述着过去的故事，而新开的文创店铺则为这条老街注入了新的活力。</p>
+    </div>
+    
+    <!-- 摄影场景容器 -->
+    <div class="photo-scene" id="sceneContainer"></div>
+    
+    <!-- 加载指示器 -->
+    <div class="loader" id="loader"></div>
+    
+    <!-- 返回按钮 -->
+    <button class="back-button" id="backButton">←</button>
+    
+    <script>
+        // 确保微信内置浏览器全屏效果
+        document.addEventListener('WeixinJSBridgeReady', function() {
+            WeixinJSBridge.call('hideToolbar');
+        });
+        
+        // 页面可见性变化时确保全屏
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && typeof WeixinJSBridge !== 'undefined') {
+                setTimeout(function() {
+                    WeixinJSBridge.call('hideToolbar');
+                }, 100);
+            }
+        });
+        
+        // 获取DOM元素
+        const mainContent = document.getElementById('mainContent');
+        const sceneContainer = document.getElementById('sceneContainer');
+        const backButton = document.getElementById('backButton');
+        const loader = document.getElementById('loader');
+        
+        // 当前加载的场景
+        let currentScene = null;
+        
+        // 按钮点击处理
+        document.querySelectorAll('.photo-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 获取目标场景信息
+                const sceneName = this.getAttribute('data-scene');
+                const sceneSrc = this.getAttribute('data-src');
+                
+                // 添加点击动效
+                this.classList.add('clicked');
+                
+                // 显示加载指示器
+                loader.style.display = 'block';
+                
+                // 加载场景内容
+                loadScene(sceneName, sceneSrc);
+            });
+        });
+        
+        // 加载场景函数
+        function loadScene(sceneName, sceneSrc) {
+            console.log('开始加载场景:', sceneName, '从路径:', sceneSrc);
+            
+            // 发起AJAX请求获取场景内容
+            fetch(sceneSrc)
+                .then(response => {
+                    console.log('场景加载响应状态:', response.status);
+                    if (!response.ok) {
+                        throw new Error('网络响应异常: ' + response.status);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    console.log('成功获取场景内容，长度:', html.length);
+                    
+                    // 延迟执行以模拟场景加载
+                    setTimeout(() => {
+                        // 隐藏主内容
+                        mainContent.classList.add('hidden');
+                        
+                        // 隐藏加载指示器
+                        loader.style.display = 'none';
+                        
+                        // 显示返回按钮
+                        backButton.style.display = 'flex';
+                        
+                        // 填充场景容器
+                        sceneContainer.innerHTML = html;
+                        console.log('场景内容已添加到DOM');
+                        
+                        // 显示场景容器
+                        sceneContainer.style.display = 'block';
+                        
+                        // 记录当前场景
+                        currentScene = sceneName;
+                        
+                        // 手动执行脚本内容
+                        const scriptElements = sceneContainer.querySelectorAll('script');
+                        scriptElements.forEach(script => {
+                            const newScript = document.createElement('script');
+                            
+                            // 复制所有属性
+                            Array.from(script.attributes).forEach(attr => {
+                                newScript.setAttribute(attr.name, attr.value);
+                            });
+                            
+                            // 复制脚本内容
+                            newScript.textContent = script.textContent;
+                            
+                            // 替换原脚本
+                            script.parentNode.replaceChild(newScript, script);
+                        });
+                        
+                        // 添加活跃类，触发过渡动画
+                        setTimeout(() => {
+                            sceneContainer.classList.add('active');
+                            console.log('场景容器已激活');
+                            
+                            // 确保脚本执行后再尝试初始化
+                            setTimeout(() => {
+                                // 执行场景特定的初始化逻辑
+                                if (sceneName === 'scene-a') {
+                                    console.log('尝试初始化场景A');
+                                    if (typeof window.initSceneA === 'function') {
+                                        console.log('调用场景A初始化函数');
+                                        window.initSceneA();
+                                    } else if (typeof initSceneA === 'function') {
+                                        console.log('调用局部作用域场景A初始化函数');
+                                        initSceneA();
+                                    } else {
+                                        console.error('场景A初始化函数未找到');
+                                    }
+                                } else if (sceneName === 'scene-b') {
+                                    console.log('尝试初始化场景B');
+                                    if (typeof window.initSceneB === 'function') {
+                                        console.log('调用场景B初始化函数');
+                                        window.initSceneB();
+                                    } else if (typeof initSceneB === 'function') {
+                                        console.log('调用局部作用域场景B初始化函数');
+                                        initSceneB();
+                                    } else {
+                                        console.error('场景B初始化函数未找到');
+                                        // 直接在这里实现场景B的初始化逻辑
+                                        console.log('执行内联的场景B初始化逻辑');
+                                        
+                                        // 查找场景B的元素
+                                        const sceneB = sceneContainer.querySelector('.scene-b');
+                                        if (sceneB) {
+                                            const image = sceneB.querySelector('.background-image');
+                                            if (image) {
+                                                console.log('找到图片元素，添加淡入效果');
+                                                image.classList.add('fade-in');
+                                            }
+                                            
+                                            const textContainer = sceneB.querySelector('.text-container');
+                                            if (textContainer) {
+                                                console.log('找到文本容器，添加滑入效果');
+                                                setTimeout(() => {
+                                                    textContainer.classList.add('slide-up');
+                                                }, 1000);
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                // 阻止微信导航栏显示
+                                if (typeof WeixinJSBridge !== 'undefined') {
+                                    WeixinJSBridge.call('hideToolbar');
+                                }
+                            }, 100);
+                        }, 50);
+                    }, 300);
+                })
+                .catch(error => {
+                    console.error('加载场景失败:', error);
+                    alert('加载场景失败，请重试: ' + error.message);
+                    loader.style.display = 'none';
+                });
+        }
+        
+        // 返回按钮处理
+        backButton.addEventListener('click', function() {
+            // 隐藏场景
+            sceneContainer.classList.remove('active');
+            
+            // 延迟后清空并隐藏场景容器
+            setTimeout(() => {
+                sceneContainer.style.display = 'none';
+                sceneContainer.innerHTML = '';
+                
+                // 显示主内容
+                mainContent.classList.remove('hidden');
+                
+                // 隐藏返回按钮
+                backButton.style.display = 'none';
+                
+                // 强制隐藏微信导航栏
+                if (typeof WeixinJSBridge !== 'undefined') {
+                    WeixinJSBridge.call('hideToolbar');
+                }
+                
+                // 重置当前场景
+                currentScene = null;
+                
+                // 延迟再次确保导航栏隐藏
+                setTimeout(function() {
+                    if (typeof WeixinJSBridge !== 'undefined') {
+                        WeixinJSBridge.call('hideToolbar');
+                    }
+                }, 300);
+            }, 500);
+        });
+    </script>
+</body>
+</html> 

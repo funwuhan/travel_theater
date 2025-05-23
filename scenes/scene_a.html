@@ -1,0 +1,125 @@
+<!-- 黄昏印象场景 -->
+<div class="scene-a">
+    <img class="background-image" src="../assets/images/tanhualin_alley_dusk.jpg" alt="昙华林街景">
+    <div class="text-container">
+        <div class="text-backdrop">
+            <p class="animated-text">一心的故事，昙华林的回响</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 确保在单独打开文件时也有基本样式 */
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: 'Ma Shan Zheng', 'Noto Serif SC', "PingFang SC", "Microsoft YaHei", serif;
+        background: #000;
+    }
+    
+    /* 展示A场景样式 - 黄昏印象 */
+    .scene-a {
+        width: 100%;
+        height: 100vh;
+        position: relative;
+        background: #000;
+    }
+    
+    .scene-a .background-image {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        top: 0;
+        left: 0;
+    }
+    
+    .scene-a .text-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        text-align: center;
+        width: 80%;
+        max-width: 600px;
+    }
+    
+    .scene-a .text-backdrop {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 15px;
+        padding: 20px 30px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .scene-a .animated-text {
+        color: #fff;
+        font-size: 2rem;
+        line-height: 1.8;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        position: relative;
+        font-family: 'Ma Shan Zheng', cursive;
+        letter-spacing: 0.1em;
+        width: 0;
+        animation: typing 4s steps(20, end) forwards;
+    }
+    
+    @keyframes typing {
+        from { width: 0; }
+        to { width: 100%; }
+    }
+    
+    .scene-a .animated-text::after {
+        content: '|';
+        position: absolute;
+        right: -8px;
+        color: #fff;
+        animation: blink 0.8s infinite;
+    }
+    
+    @keyframes blink {
+        from, to { opacity: 1; }
+        50% { opacity: 0; }
+    }
+    
+    @media (max-width: 768px) {
+        .scene-a .animated-text {
+            font-size: 1.6rem;
+            letter-spacing: 0.05em;
+        }
+        .scene-a .text-container { width: 90%; }
+    }
+</style>
+
+<script>
+    // 简化的初始化函数
+    function initSceneA() {
+        console.log('场景A初始化函数被调用');
+    }
+    
+    // 在单独打开页面时自动初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        // 检查是否为顶级窗口（单独打开）或在iframe中（被首页引用）
+        if (window.self === window.top) {
+            console.log('单独打开scene_a.html，自动初始化');
+            // 设置字体加载
+            if (!document.getElementById('google-fonts')) {
+                const link = document.createElement('link');
+                link.id = 'google-fonts';
+                link.rel = 'stylesheet';
+                link.href = 'https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap';
+                document.head.appendChild(link);
+            }
+            // 自动初始化
+            initSceneA();
+        } else {
+            console.log('在iframe中加载scene_a.html，等待首页调用初始化');
+        }
+    });
+</script> 
