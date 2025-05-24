@@ -59,7 +59,7 @@
 - **故事性叙事**: 每张照片的不同位置会根据需要覆盖不同的文字描述，如同海报或字幕。
 - **轻量级架构**: 基于纯静态网页技术 (HTML, CSS, JavaScript)，确保在轻量服务器上流畅运行。
 - **移动优先与响应式设计**: 确保在手机等移动设备上（尤其是微信环境）有良好展示。
-- **个性化内容更新**: 允许通过创建新的HTML页面来不定期更新作品集，这些页面将通过 `<iframe>` 嵌入主页。
+- **动态内容加载**: 使用AJAX加载子页面内容，避免页面跳转导致微信导航栏重新出现。
 
 ### 用户需求点 (已确认)
 - **作品展示**: 个人摄影作品集，无需分类。
@@ -79,90 +79,74 @@
 
 ### 技术架构
 - **前端**: 纯静态网页 (HTML5 + CSS3 + JavaScript)。
-- **页面嵌入**: `index.html` 作为主容器，使用 `<iframe>` 嵌入各个独立的摄影集/主题页面。
+- **内容加载**: 使用AJAX动态加载子页面内容，避免页面跳转导致微信导航栏重新出现。
 - **静态资源**:
-    - CSS和JavaScript文件分别存放于根目录下的 `css/` 和 `js/` 文件夹。
-    - 图片、音频、字体等媒体文件存放于 `assets/` 目录。后续也可按需使用腾讯云COS。
+    - CSS文件存放于根目录下的 `css/` 文件夹。
+    - 图片、音频、字体等媒体文件存放于 `assets/` 目录。
 - **部署**: 轻量服务器静态文件托管。
 
-### 项目结构 (已更新)
+### 项目结构 (当前)
 ```
 travel_theater/
-├── index.html              # 主入口页面 (iframe 容器)
+├── index.html              # 主入口页面 (动态加载子页面内容)
 ├── css/                    # CSS样式目录
 │   └── main.css            # 全局和核心样式 (含微信全屏)
-├── js/                     # JavaScript脚本目录 (未来使用)
-│   └── main.js             # 主要交互逻辑 (iframe切换, 音频等)
-├── assets/                 # 媒体资源目录 (图片, 音频, 字体等)
-│   ├── images/
-│   ├── audio/
-│   └── fonts/
-├── pages/                  # 各个独立的摄影集/主题页面 (HTML片段)
-│   ├── welcome.html
-│   ├── collection_A.html   # (示例)
-│   └── collection_B.html   # (示例)
+├── assets/                 # 媒体资源目录
+│   └── images/             # 图片资源
+│       ├── tanhualin_alley_dusk.jpg  # 昙华林黄昏照片
+│       └── tanhualin_day.jpg         # 昙华林日景照片
+├── scenes/                 # 场景页面目录
+│   ├── scene_a.html        # 昙华林·黄昏印象场景
+│   └── scene_b.html        # 昙华林·光影街巷场景
+├── weixinFullscreen.md     # 微信浏览器全屏解决方案文档
 └── README.md               # 项目说明文档
 ```
 
-### 技术实现要点与策略 (根据参考项目 v37chapter 修订)
-- **响应式布局**: 针对 `pages/*.html` 内的内容，使用 CSS Grid, Flexbox, 以及 Media Queries。`index.html` 本身主要负责全屏框架。
-- **微信真全屏核心策略 (CSS)**:
-    1.  **Viewport Meta**: 在 `index.html` 和所有 `pages/*.html` 中使用 `<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">`。
-    2.  **全局样式 (`css/main.css`)**:
-        ```css
-        html, body {
-            height: 100%; /* 或 100vh */
-            width: 100%;  /* 或 100vw */
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
-            overscroll-behavior: none; /* 防止橡皮筋效应 */
-            -webkit-overflow-scrolling: touch; /* 可选，有时与overflow:hidden一起使用 */
-        }
-        /* 进一步确保滚动条不出现 */
-        body::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera, Edge */
-        }
-        html {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-        ```
-    3.  **`index.html` 内 `<iframe>` 容器**:
-        ```html
-        <!-- 在 index.html -->
-        <body style="margin:0; padding:0; overflow:hidden;">
-            <iframe id="contentFrame" src="pages/welcome.html" style="width:100vw; height:100vh; border:none; margin:0; padding:0; display:block;"></iframe>
-        </body>
-        ```
-    4.  **子页面 (`pages/*.html`) 结构**: 子页面自身也应避免产生内部滚动，内容设计为单屏展示。
-    5.  **Fullscreen API (备用/辅助)**: 鉴于参考项目未使用，此API优先级降低。如果纯CSS方法在某些情况下失效，可考虑在用户首次交互时尝试调用 `document.documentElement.requestFullscreen()` 作为辅助。
-- **平滑过渡**: 子页面内部的照片切换等，使用 CSS Transitions 或 Animations。`<iframe>` 切换本身可以很简单，或者如果需要也可以加JS控制的淡入淡出。
-- **音频控制**: HTML5 `<audio>` 元素和 JavaScript API，考虑在 `index.html`层面统一管理，或由子页面触发。
-- **文字覆盖**: 子页面内使用 CSS绝对定位和 `z-index`。
-- **图片优化**: 压缩图片大小，考虑使用 WebP 格式。
-- **音频优化**: 压缩音频文件。
-- **JavaScript 模块化**: 简单的项目可以直接在 `<script>` 标签引入，复杂后可考虑 ES6 Modules 存放在 `js/` 目录下。
+### 微信全屏解决方案
+本项目通过组合使用以下几种技术手段，成功实现了微信内置浏览器中的"真全屏"效果：
 
-### 开发阶段 (修订)
-1.  **环境搭建与README初始化** (已完成部分)
-2.  **核心需求分析与确认** (已完成部分)
-3.  **`index.html` 框架与基础CSS搭建，路径调整** (已完成)
-4.  **微信全屏效果验证** (已完成 - 效果良好)
-5.  **创建第一个真实内容子页面 (例如 `pages/collection_A.html`)**:
-    *   设计页面布局和内容 (例如，单张背景图片 + 文字)。
-    *   确保在微信中保持真全屏效果。
-6.  **照片展示与切换逻辑 (在子页面中)**:
-    *   实现单张图片全屏展示。
-    *   简单的左右切换（平滑过渡）。
-    *   图片上文字覆盖效果。
-7.  **音频集成**:
-    *   选择合适的背景音乐/音效。
-    *   实现播放控制。
-8.  **完善交互与样式**: 根据原型反馈进行调整。
-9.  **后续页面开发**: 根据第一个子页面的模板进行扩展。
-10. **整体测试与优化**: 跨设备、跨浏览器（重点是微信）测试，性能优化。
-11. **部署上线**。
+1. **CSS布局固定** - 使用固定定位和视口单位
+2. **微信JS-SDK接口** - 调用微信提供的JS桥接口
+3. **单页面应用设计** - 避免页面跳转导致导航栏重新出现
+4. **事件监听和重复调用** - 确保各种状态下都能维持全屏效果
+
+详细实现方案请参考 `weixinFullscreen.md` 文档。
+
+### 功能实现
+- **首页**: 展示项目介绍和场景入口按钮
+- **场景加载**: 通过AJAX获取场景HTML内容，动态加载到主页中
+- **动画效果**: 
+  - 场景A (黄昏印象): 打字机动画效果和磨砂玻璃文字背景
+  - 场景B (光影街巷): 图片淡入和文字滑入效果
+- **返回功能**: 左上角返回按钮，返回到主页面
+- **微信全屏**: 使用WeixinJSBridge API隐藏微信导航栏
+
+### 开发阶段 (当前进展)
+1.  **环境搭建与README初始化** ✓
+2.  **核心需求分析与确认** ✓
+3.  **`index.html` 框架与基础CSS搭建** ✓
+4.  **微信全屏效果验证** ✓
+5.  **创建场景页面** ✓
+    *   场景A: 昙华林·黄昏印象 ✓
+    *   场景B: 昙华林·光影街巷 ✓
+6.  **照片展示与动画效果** ✓
+    *   打字机动画效果 ✓
+    *   图片淡入和文字滑入效果 ✓
+7.  **场景切换逻辑** ✓
+    *   使用AJAX加载场景内容 ✓
+    *   平滑过渡效果 ✓
+8.  **音频集成** (待实现)
+    *   选择合适的背景音乐/音效
+    *   实现播放控制
+9.  **完善交互与样式** (进行中)
+    *   优化微信全屏效果，解决返回主页时导航栏出现的问题
+    *   改进动画效果和交互体验
+10. **后续场景开发** (待实现)
+    *   创建更多摄影场景页面
+11. **整体测试与优化** (待实现)
+    *   跨设备测试，尤其是微信环境
+    *   性能优化
+12. **部署上线** (待实现)
 
 ---
 > 本说明书将随着项目进展和沟通不断更新完善。 

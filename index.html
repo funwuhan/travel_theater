@@ -288,6 +288,14 @@
                         sceneContainer.innerHTML = html;
                         console.log('场景内容已添加到DOM');
                         
+                        // 修正图片路径
+                        const images = sceneContainer.querySelectorAll('img[src^="../"]');
+                        images.forEach(img => {
+                            const newSrc = img.getAttribute('src').replace('../', '');
+                            console.log('修正图片路径:', img.getAttribute('src'), '->', newSrc);
+                            img.setAttribute('src', newSrc);
+                        });
+                        
                         // 显示场景容器
                         sceneContainer.style.display = 'block';
                         
